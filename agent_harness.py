@@ -1,7 +1,7 @@
-"""MilkLab Agent Harness (S2).
+"""Daily White Laundry Agent Harness (S2).
 
 Usage:
-    python agent_harness.py --cmd "บันทึกขายนมหมี 2 ขวด ขวดละ 65"
+    python agent_harness.py --cmd "ค้นหาราคาซักแห้ง"
 
 รับคำสั่งภาษาไทย ส่งให้ Gemini พร้อม tool schema parse response เป็น tool call
 เรียก tool จริง print trace log
@@ -21,26 +21,26 @@ from google import genai
 TOOL_SCHEMA = [
     {
         "name": "log_sale",
-        "description": "บันทึกการขายลง Google Sheets และส่ง notification",
+        "description": "บันทึกออร์เดอร์บริการซักรีดลง Google Sheets และส่ง notification",
         "parameters": {
             "type": "object",
             "properties": {
-                "menu": {"type": "string", "description": "ชื่อเมนู"},
-                "qty": {"type": "integer", "description": "จำนวนที่ขาย"},
-                "price": {"type": "number", "description": "ราคาต่อหน่วย"},
+                "service_type": {"type": "string", "description": "ประเภทบริการ เช่น ซัก + อบ, ซักแห้ง, รีด หรือซักรองเท้า"},
+                "quantity": {"type": "number", "description": "น้ำหนักเป็นกิโลกรัม หรือจำนวนชิ้น/คู่"},
+                "unit_price": {"type": "number", "description": "ราคาต่อกิโลกรัม ชิ้น หรือคู่"},
             },
-            "required": ["menu", "qty", "price"],
+            "required": ["service_type", "quantity", "unit_price"],
         },
     },
     {
-        "name": "query_sales",
-        "description": "ดูยอดขายของวันที่ระบุ",
+        "name": "search_laundry_services",
+        "description": "ค้นหาข้อมูลบริการซักรีดและราคาของร้าน Daily White Laundry",
         "parameters": {
             "type": "object",
             "properties": {
-                "date": {"type": "string", "description": "วันที่ format YYYY-MM-DD"},
+                "query": {"type": "string", "description": "คำค้น เช่น ซักแห้ง ราคา รีด หรือบริการรับ-ส่ง"},
             },
-            "required": ["date"],
+            "required": ["query"],
         },
     },
     {

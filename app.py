@@ -1,4 +1,4 @@
-"""MilkLab RAG Chatbot (S3).
+"""Daily White Laundry RAG Chatbot (S3).
 
 Run locally: streamlit run app.py
 Deploy: push to GitHub then Actions deploys to HuggingFace Space
@@ -10,6 +10,9 @@ import json
 import os
 import uuid
 from datetime import datetime, timezone
+
+from dotenv import load_dotenv  
+load_dotenv()
 
 import faiss
 import numpy as np
@@ -93,18 +96,18 @@ def _split_text_to_chunks(text: str, chunk_size: int = CHUNK_SIZE, overlap: int 
 
 @st.cache_resource
 def load_index():
-    """TODO 1+2+3: โหลด menu_kb.md, split เป็น chunk, encode ด้วย sentence-transformers,
+    """TODO 1+2+3: โหลด daily_white_kb.md, split เป็น chunk, encode ด้วย sentence-transformers,
     สร้าง faiss index. Cache เพราะโหลด model ครั้งแรกใช้เวลา 30 วินาที
 
     Returns: (model, index, chunks_list)
     """
-    kb_path = os.path.join(os.path.dirname(__file__), "menu_kb.md")
+    kb_path = os.path.join(os.path.dirname(__file__), "daily_white_kb.md")
     with open(kb_path, "r", encoding="utf-8") as f:
         kb_text = f.read()
 
     chunks = _split_text_to_chunks(kb_text)
     if not chunks:
-        raise RuntimeError("menu_kb.md is empty or could not be chunked")
+        raise RuntimeError("daily_white_kb.md is empty or could not be chunked")
 
     model = SentenceTransformer(EMBEDDING_MODEL_NAME)
     embeddings = model.encode(chunks, convert_to_numpy=True)
@@ -175,7 +178,7 @@ def generate_answer(
 
         context_text = "\n\n".join(
             f"[{i}] {chunk}" for i, chunk in enumerate(context_chunks, 1))
-        prompt = f"""คุณคือผู้ช่วยของร้าน MilkLab°
+        prompt = f"""คุณคือผู้ช่วยของร้าน Daily White Laundry ร้านซักรีดครบวงจร
 ตอบคำถามโดยอ้างอิงจากข้อมูลใน CONTEXT เท่านั้น
 ถ้าข้อมูลไม่พอหรือไม่มีใน CONTEXT ให้ตอบว่า "ไม่ทราบจากข้อมูลที่มี"
 
@@ -202,9 +205,9 @@ QUESTION:
 
 
 def main():
-    st.set_page_config(page_title="MilkLab° RAG", page_icon="🥛")
-    st.title("MilkLab° RAG Chatbot")
-    st.caption("ถามอะไรเกี่ยวกับ MilkLab ได้ ตอบจาก menu_kb.md")
+    st.set_page_config(page_title="Daily White Laundry", page_icon="🧺")
+    st.title("Daily White Laundry")
+    st.caption("สอบถามบริการ ราคา และบริการรับ-ส่งผ้าของ Daily White ได้จาก daily_white_kb.md")
 
     try:
         model, index, chunks = load_index()
@@ -219,7 +222,7 @@ def main():
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    if prompt := st.chat_input("ถามอะไรเกี่ยวกับ MilkLab"):
+    if prompt := st.chat_input("ถามอะไรเกี่ยวกับ Daily White Laundry"):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
